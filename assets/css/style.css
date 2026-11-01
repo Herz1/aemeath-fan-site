@@ -504,18 +504,23 @@ button.hero-quote { display: inline-flex; align-items: center; gap: 10px; backgr
 .vlang button.on { background: var(--cyan); color: #0b1430; }
 
 /* ---------- 像素电子幽灵 ---------- */
-.ghost { position: fixed; right: 18px; bottom: 18px; z-index: 72; width: 96px; transition: opacity .3s; --beat: 0; }
-.ghost-btn { display: block; width: 96px; height: 102px; padding: 0; border: 0; background: none; cursor: pointer; animation: ghostBob 3.2s steps(8) infinite; filter: drop-shadow(0 0 10px rgba(127,227,255,.55)); transform-origin: 50% 80%; }
-.ghost-btn canvas { width: 100%; height: 100%; image-rendering: pixelated; transform: scale(calc(1 + var(--beat) * .14)); transition: transform .08s; }
+.ghost { position: fixed; right: 14px; bottom: 14px; z-index: 72; width: 128px; transition: opacity .3s; --beat: 0; --fx: 0px; --fy: -70px; --rot: -26deg; }
+.ghost[data-fly="left"] { --fx: -90px; --fy: -20px; --rot: -30deg; }
+.ghost[data-fly="right"] { --fx: 90px; --fy: -20px; --rot: 30deg; }
+.ghost[data-fly="up-l"] { --rot: 26deg; }
+.ghost-btn { display: block; width: 128px; height: 112px; padding: 0; border: 0; background: none; cursor: pointer; animation: ghostSway 4.8s steps(12) infinite; filter: drop-shadow(0 0 10px rgba(127,227,255,.5)); transform-origin: 50% 70%; }
+.ghost-btn canvas { width: 100%; height: 100%; image-rendering: pixelated; transform: scale(calc(1 + var(--beat) * .1)); transition: transform .08s; }
+@keyframes ghostSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
 .ghost-btn:hover { filter: drop-shadow(0 0 14px var(--pink)); }
 .ghost-btn:focus-visible { outline: 2px dashed var(--cyan); outline-offset: 4px; border-radius: 8px; }
 @keyframes ghostBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .ghost-shadow { position: absolute; left: 30%; right: 30%; bottom: -6px; height: 6px; border-radius: 50%; background: rgba(127,227,255,.25); filter: blur(2px); animation: ghostShadow 3.2s steps(8) infinite; }
 @keyframes ghostShadow { 50% { transform: scaleX(.7); opacity: .5; } }
-.ghost.blink { animation: ghostOut .42s steps(6) forwards; }
-.ghost.appear { animation: ghostIn .5s steps(6); }
-@keyframes ghostOut { 0% { opacity: 1; } 30% { opacity: .2; } 45% { opacity: .9; } 100% { opacity: 0; transform: scaleY(.1); } }
-@keyframes ghostIn { 0% { opacity: 0; transform: scaleY(.1); } 50% { opacity: .5; } 70% { opacity: .2; } 100% { opacity: 1; } }
+/* 瞬移：先像游戏里那样倾斜着飞出去，闪烁消失，再从新位置斜着飞回来 */
+.ghost.blink { animation: ghostOut .46s steps(8) forwards; }
+.ghost.appear { animation: ghostIn .52s steps(8); }
+@keyframes ghostOut { 0% { opacity: 1; transform: none; } 25% { transform: rotate(var(--rot)); } 55% { opacity: .9; } 70% { opacity: .25; } 80% { opacity: .8; } 100% { opacity: 0; transform: translate(var(--fx), var(--fy)) rotate(var(--rot)); } }
+@keyframes ghostIn { 0% { opacity: 0; transform: translate(calc(var(--fx) * -.6), 30px) rotate(var(--rot)); } 40% { opacity: .5; } 55% { opacity: .2; } 75% { opacity: 1; transform: rotate(calc(var(--rot) * .4)); } 100% { opacity: 1; transform: none; } }
 .ghost-say { position: absolute; bottom: 100%; right: 0; margin: 0 0 4px; white-space: nowrap; font-size: .78rem; color: #3b2450; background: #fff5fb; border: 2px solid #ff9ad5; border-radius: 4px; padding: 3px 8px; box-shadow: 3px 3px 0 rgba(255,154,213,.4); opacity: 0; transform: translateY(6px); transition: .25s steps(3); pointer-events: none; }
 .ghost[data-side="l"] .ghost-say { right: auto; left: 0; }
 .ghost-say.show { opacity: 1; transform: none; }
@@ -523,7 +528,7 @@ button.hero-quote { display: inline-flex; align-items: center; gap: 10px; backgr
 @keyframes noteUp { to { transform: translate(14px, -70px); opacity: 0; } }
 
 /* ---------- 播放器面板 ---------- */
-.mplayer { position: fixed; right: 18px; bottom: 132px; z-index: 71; width: min(360px, calc(100vw - 32px)); background: rgba(10,14,36,.97); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.55), 6px 6px 0 rgba(255,154,213,.18); backdrop-filter: blur(16px); opacity: 0; visibility: hidden; transform: translateY(12px) scale(.98); transform-origin: bottom right; transition: .35s var(--ease); }
+.mplayer { position: fixed; right: 18px; bottom: 140px; z-index: 71; width: min(360px, calc(100vw - 32px)); background: rgba(10,14,36,.97); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.55), 6px 6px 0 rgba(255,154,213,.18); backdrop-filter: blur(16px); opacity: 0; visibility: hidden; transform: translateY(12px) scale(.98); transform-origin: bottom right; transition: .35s var(--ease); }
 .mplayer.open { opacity: 1; visibility: visible; transform: none; }
 .mplayer header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
 .mplayer header b { display: block; color: var(--pink); font-size: 1.05rem; }
@@ -638,7 +643,13 @@ body.music-on .noise { opacity: calc(.5 + var(--beat, 0) * .5); }
 .modal-box > .x { position: absolute; right: 0; top: -44px; }
 .ratio { aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 90px rgba(0,0,0,.6); }
 .ratio iframe { width: 100%; height: 100%; border: 0; }
-.modal-cap { text-align: center; color: var(--dim); font-size: .9rem; }
+.modal-cap { text-align: center; color: var(--dim); font-size: .9rem; line-height: 1.7; }
+.modal-cap a { color: var(--cyan); }
+.vcap-t { color: var(--text); }
+.vsrc { display: inline-flex; border: 1px solid var(--line); border-radius: 99px; padding: 2px; margin-right: 10px; vertical-align: middle; }
+.vsrc button { background: none; border: 0; border-radius: 99px; padding: 2px 12px; font-size: .8rem; color: var(--dim); }
+.vsrc button.on { background: var(--pink); color: #2a1630; font-weight: 700; }
+.vhelp { display: block; max-width: 60ch; margin: 6px auto 0; font-size: .76rem; color: var(--dim); }
 .lb-fig { position: relative; margin: 0; max-width: 90vw; max-height: 86vh; text-align: center; }
 .lb-fig img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 10px; margin: 0 auto; }
 .lb-fig figcaption { color: var(--dim); font-size: .85rem; margin-top: 8px; }
@@ -705,8 +716,8 @@ body.music-on .noise { opacity: calc(.5 + var(--beat, 0) * .5); }
   .topbar { gap: 8px; }
   .brand em, .vlang-ic { display: none; }
   .lang button { padding: 2px 6px; }
-  .ghost, .ghost-btn { width: 72px; }
-  .ghost-btn { height: 77px; }
+  .ghost, .ghost-btn { width: 96px; }
+  .ghost-btn { height: 84px; }
   .mplayer { bottom: 104px; }
 }
 @media (max-width: 400px) {

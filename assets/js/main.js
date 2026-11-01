@@ -200,10 +200,28 @@
       <div class="vmeta"><p>${esc(L(v.t))}</p><small>${v.date || ''}${extra}</small></div>`, `data-title="${esc(L(v.t))}"`);
   }
   const vmodal = $('#vmodal'), vframe = $('#vframe');
+  /* YouTube 的「请登录以确认你不是机器人」是对观看者网络（常见于 VPN / 代理）的风控：
+     用 youtube.com（而非 nocookie）嵌入，浏览器里已登录的 YouTube 账号才能通过验证；
+     有官方 B 站同款时可一键换源，国内无需代理 */
   function openVideo(id, title) {
     music.pause(); voice.stop();
-    vframe.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="${esc(title || '')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-    $('#vcap').innerHTML = `${esc(title || '')} · <a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">YouTube ↗</a>`;
+    const v = vById(id) || { id };
+    let src = v.bili ? store.get('vsrc', lang === 'zh' ? 'bili' : 'yt') : 'yt';
+    const show = which => {
+      src = which;
+      const url = which === 'bili'
+        ? `https://player.bilibili.com/player.html?bvid=${v.bili}&autoplay=1&high_quality=1&danmaku=0`
+        : `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1&origin=${encodeURIComponent(location.origin)}`;
+      vframe.innerHTML = `<iframe src="${url}" title="${esc(title || '')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen${which === 'bili' ? ' sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"' : ''}></iframe>`;
+      const zh = v.t ? v.t[0] : title;
+      $('#vcap').innerHTML = (v.bili ? `<span class="vsrc"><button data-vs="yt" class="${which === 'yt' ? 'on' : ''}">YouTube</button><button data-vs="bili" class="${which === 'bili' ? 'on' : ''}">${t('v.bili')}</button></span>` : '') +
+        `<span class="vcap-t">${esc(title || '')}</span> · <a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">YouTube ↗</a> · ` +
+        (v.bili ? `<a href="https://www.bilibili.com/video/${v.bili}" target="_blank" rel="noopener">${t('v.bili')} ↗</a>`
+          : `<a href="https://search.bilibili.com/all?keyword=${encodeURIComponent('鸣潮 ' + zh)}" target="_blank" rel="noopener">${t('v.biliSearch')} ↗</a>`) +
+        (which === 'yt' ? `<small class="vhelp">${t(v.bili ? 'v.help' : 'v.helpNoBili')}</small>` : '');
+    };
+    $('#vcap').onclick = e => { const b = e.target.closest('[data-vs]'); if (b) { store.set('vsrc', b.dataset.vs); show(b.dataset.vs); } };
+    show(src);
     openModal(vmodal);
   }
   function openModal(m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
@@ -688,86 +706,138 @@
     return { pause() { audio.pause(); }, toggle, isPlaying: () => !audio.paused, open: openPanel, close: closePanel, isOpen: () => panel.classList.contains('open') };
   })();
 
-  /* ---------- 像素电子幽灵「飞行雪绒」：游戏待机式的漂浮、闪烁、瞬移，点击即播放器 ---------- */
+  /* ---------- 像素电子幽灵「飞行雪绒」：按游戏内待机小人重绘——大头、光环、机械羽翼；
+     待机时会眨眼、换表情、扇动羽翼，隔一会儿以倾斜的飞行姿态瞬移；点击即播放器 ---------- */
   const ghost = (function () {
     const el = $('#ghost'), cv = $('#ghostCv'), g = cv.getContext('2d'), say = $('#ghostSay');
-    const SPRITE = [
-      '........BBBBBBBB........', '......BB........BB......', '........BBBBBBBB........', '........................',
-      '.........KKKKKKK........', '.......KKPPPPPPPKK..KKK..', '......KPPPPPPPPPPPKKPPPK.', '.....KPPPPPPPPPPPPPKPPK..',
-      '.....KPPpPPPPPPpPPPKPPK..', '....KPPpPPPPPPPPpPPPKYK..', '....KPPSSSSSSSSSSPPPKYK..', '....KPSSSSSSSSSSSSPPKK...',
-      '....KPGGGGGSSGGGGGPK.....', '....KPGgGGGGGGgGGGPK.....', '....KPSGGGGSSGGGGSPK.....', '....KPSssSSSSSSssSPK.....',
-      '.....KPSSSSMMSSSSPK......', '......KPSSSSSSSSPK.......', '.......KKSSSSSSKK........', '......KWWKSSSSKWWK.......',
-      '.....KWWWWbRRbWWWWK......', '.....KWWWWWRRWWWWWK......', '....KSKWWWWWWWWWWKSK.....', '....KSKWwWWWWWWwWKSK.....',
-      '....KKKWWWWWWWWWWKKK.....', '.......KWWWWWWWWK........', '.......KWWWwwWWWK........', '........KWWWWWWK.........',
-      '........KWWWWWWK.........', '.........KWWWWK..........', '..........KWWK...........', '...........KK............'
-    ].map(r => r.padEnd(24, '.').slice(0, 24));
-    const PAL = { K: '#2a1b3d', P: '#ff8fc8', p: '#e0609f', Y: '#ffe48a', S: '#ffe6da', s: '#f7c3b5', G: '#1b1530', g: '#7fe3ff', W: '#f6f4ff', w: '#c9c6e8', B: '#7fe3ff', b: '#3aa6d6', M: '#c2405f', R: '#ff5a8a' };
-    const OX = 4, OY = 1, TAIL = 22;
-    let glitch = 0, tick = 0, sayTimer = 0, idleTimer = 0, home = true;
+    const W = cv.width, H = cv.height;           /* 64 × 56 */
+    const HX = 17, HY = 13;                      /* 头部网格左上角 */
+    const HEAD = [
+      '..............KK..............', '.............KhK..............', '..........KKKKPKKKK...........', '........KKPPPPPPPPPKK.........',
+      '......KKPPhhPPPPPPPPPKK.......', '.....KPPhhPPPPPPPPPPPPPK......', '....KPPPPPPPPPPPPPPPPPPPK.....', '...KPPPPPpPPPPPPPPPpPPPPPK....',
+      '...KPPPPpPPPPPPPPPPPpPPPPK....', '..KPPPPpSSpPPPPPPPpSSpPPPBK...', '..KPPPpSSSSpPPPPPpSSSSpPBBK...', '..KPPPSSSSSSSSSSSSSSSSSPPBK...',
+      '..KPPSSSSSSSSSSSSSSSSSSSPPK...', '..KPPSSeeeeSSSSSSSSeeeeSPPK...', '..KPPSSeeeeSSSSSSSSeeeeSPPK...', '..KPpSSeeeeSSSSSSSSeeeeSpPK...',
+      '..KPpSSCCSSSSSSSSSSSSCCSpPK...', '..KPPpSSSSSSSSSSSSSSSSpPPPK...', '...KPPpSSSSSSSSSSSSSSpPPPYK...', '...KPPPKKSSSSSSSSSSKKPPPYYK...',
+      '....KPPK.KKSSSSSSKK.KPPYK.....', '....KPK..KWWWWWWWWK..KYK......', '.....K...KWWbBBbWWK...K.......', '.........KWWWBBWWWK...........',
+      '........KWWWWWWWWWWK..........', '........KWwWWWWWWwWK..........', '.........KKWWWWWWKK...........', '..........KSK..KSK............',
+      '..........KSK..KSK............', '..........KWK..KWK............', '...........K....K.............'
+    ].map(r => r.padEnd(30, '.').slice(0, 30));
+    const PAL = { K: '#3a2147', P: '#ff9ccb', p: '#e46aa8', h: '#ffd6ec', Y: '#ffe48a', S: '#ffece2', C: '#ff9ab5', W: '#f7f6ff', w: '#c8c4e6', B: '#7fe3ff', b: '#3a8fd6',
+      k: '#5a2a1a', G: '#ffcf4a', g: '#e89a2a', R: '#ff5a8a', E: '#ffffff' };
+    /* 表情：眼睛 4×3（左眼，右眼自动镜像），嘴 4×2 */
+    const EYES = {
+      open: ['KKKK', 'kkEk', 'gGGg'], look: ['KKKK', 'kEkk', 'gGGg'], happy: ['.KK.', 'K..K', '....'], blink: ['....', 'KKKK', '....'],
+      wow: ['KKKK', 'kEEk', 'kkkk'], sleepy: ['....', '....', 'KKKK'], star: ['.GG.', 'GEEG', '.GG.']
+    };
+    const MOUTH = { smile: ['K..K', '.KK.'], grin: ['.KK.', 'KRRK'], o: ['.KK.', '.KK.'], flat: ['....', '.KK.'], sing: ['KKKK', 'KRRK'] };
+    const mirror = rows => rows.map(r => [...r].reverse().join(''));
+    let fr = 0, glitch = 0, sayTimer = 0, home = true, hover = false;
+    let face = { l: 'open', r: 'open', m: 'smile' }, faceUntil = 0, blinkAt = 90, zzz = 0;
+
+    const px = (x, y, c, a = 1) => { if (c === '.') return; g.globalAlpha = a; g.fillStyle = PAL[c] || c; g.fillRect(x, y, 1, 1); };
+    function blade(x0, y0, ang, len) {
+      const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
+      for (let i = 3; i <= len; i++) {
+        const w = i < len - 4 ? .9 : (len - i) * .22 + .1;      /* 细长刃片，刃尖收窄 */
+        const cx = x0 + dx * i, cy = y0 + dy * i;
+        for (let s = -w - .9; s <= w + .9; s += .45) px(Math.round(cx + nx * s), Math.round(cy + ny * s), '#2a2644');
+        for (let s = -w; s <= w; s += .45) px(Math.round(cx + nx * s), Math.round(cy + ny * s), s < -.2 ? '#f4f2ff' : '#9d97cf');
+      }
+      if ((fr >> 4) % 6 === 0) px(Math.round(x0 + dx * len), Math.round(y0 + dy * len), '#7fe3ff');
+    }
     function draw() {
-      tick++;
-      const beat = window.__beat || 0, playing = music.isPlaying();
-      g.clearRect(0, 0, cv.width, cv.height);
-      const pass = (dx, tint, alpha) => {
-        for (let y = 0; y < SPRITE.length; y++) {
-          const row = SPRITE[y];
-          const wob = y >= TAIL ? Math.round(Math.sin(tick / 9 + y * .7) * (y - TAIL) / 5) : 0;
-          const shift = glitch && Math.random() < .25 ? (Math.random() < .5 ? -2 : 2) : 0;
-          for (let x = 0; x < 24; x++) {
-            let c = row[x]; if (c === '.') continue;
-            if (y <= 2) { g.globalAlpha = alpha * (.55 + .45 * Math.abs(Math.sin(tick / 14))); }
-            else if (y >= TAIL) { const fade = 1 - (y - TAIL) / (SPRITE.length - TAIL + 1); if ((x + y + (tick >> 3)) % 3 === 0 && fade < .6) continue; g.globalAlpha = alpha * fade; }
-            else g.globalAlpha = alpha;
-            if (c === 'M' && playing && beat > .25) c = 'R';
-            g.fillStyle = tint || PAL[c];
-            g.fillRect(OX + x + wob + shift + dx, OY + y, 1, 1);
-          }
+      fr++;
+      const playing = music.isPlaying(), beat = window.__beat || 0;
+      g.clearRect(0, 0, W, H);
+      const bob = Math.round(Math.sin(fr / 22) * 1.5 + beat * 2);
+      const flap = Math.sin(fr / (playing ? 6 : 11)) * (playing ? .22 : .13);
+      /* 机械羽翼（在身体后面） */
+      const LA = [138, 157, 176, 195, 214], LEN = [19, 23, 25, 22, 17];
+      LA.forEach((a, i) => {
+        const r = (a * Math.PI / 180) - flap * (i + 1) / 3;
+        blade(HX + 9, HY + 22 + bob, r, LEN[i]);
+        blade(HX + 18, HY + 22 + bob, Math.PI - r, LEN[i]);
+      });
+      /* 光环：紧贴头顶的椭圆弧 + 顶端菱形，轻微滞后于头部摆动并闪烁（先画，让头发压住两端） */
+      const hb = Math.round(Math.sin((fr - 8) / 22) * 1.5), hcx = HX + 15, hcy = HY + 5 + hb;
+      const ha = .6 + .4 * Math.abs(Math.sin(fr / 16));
+      for (let a = Math.PI * 1.04; a <= Math.PI * 1.96; a += .04) px(Math.round(hcx + Math.cos(a) * 15), Math.round(hcy + Math.sin(a) * 6), (Math.round(a * 25) % 3) ? '#7fe3ff' : '#e9fbff', ha);
+      [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]].forEach(([x, y]) => px(hcx + x, hcy - 8 + y, x === 0 && y === 0 ? '#ffffff' : '#7fe3ff', ha));
+      /* 头与身体 */
+      for (let y = 0; y < HEAD.length; y++) {
+        const shift = glitch && Math.random() < .2 ? (Math.random() < .5 ? -1 : 1) : 0;
+        for (let x = 0; x < 30; x++) {
+          let c = HEAD[y][x]; if (c === '.') continue;
+          if (c === 'e') c = 'S';
+          let a = 1;
+          if (y >= 27) { if ((x + y + (fr >> 3)) % 3 === 0) continue; a = .75 - (y - 27) * .15; }   /* 电子幽灵：脚下逐渐消散 */
+          px(HX + x + shift, HY + y + bob, c, a);
         }
-        /* 唱歌时张嘴 */
-        if (playing && beat > .3) { g.globalAlpha = alpha; g.fillStyle = tint || PAL.M; g.fillRect(OX + 11 + dx, OY + 17, 2, 1); }
-      };
-      if (glitch) { pass(-1, '#7fe3ff', .45); pass(1, '#ff5a8a', .45); glitch--; }
-      pass(0, null, 1);
+      }
+      /* 表情 */
+      const L = EYES[face.l], R = mirror(EYES[face.r]);
+      for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) { px(HX + 7 + x, HY + 13 + y + bob, L[y][x]); px(HX + 19 + x, HY + 13 + y + bob, R[y][x]); }
+      const M = MOUTH[face.m];
+      for (let y = 0; y < 2; y++) for (let x = 0; x < 4; x++) px(HX + 13 + x, HY + 17 + y + bob, M[y][x]);
+      if (zzz) { const zy = HY + 2 - (fr % 60) / 10; px(HX + 27, Math.round(zy), '#e9fbff', .8); px(HX + 28, Math.round(zy) - 3, '#e9fbff', .6); zzz--; }
       g.globalAlpha = 1;
+      if (glitch) glitch--;
+      think(playing, beat);
       el.style.setProperty('--beat', beat.toFixed(3));
       requestAnimationFrame(draw);
+    }
+    /* 待机 AI：眨眼、换表情；播放音乐时跟着节拍唱 */
+    const IDLE = [
+      { l: 'happy', r: 'happy', m: 'grin' }, { l: 'open', r: 'happy', m: 'smile' }, { l: 'wow', r: 'wow', m: 'o' },
+      { l: 'look', r: 'look', m: 'flat' }, { l: 'sleepy', r: 'sleepy', m: 'flat', zzz: true }, { l: 'star', r: 'star', m: 'grin' }
+    ];
+    function think(playing, beat) {
+      if (hover) { face = { l: 'happy', r: 'happy', m: 'grin' }; return; }
+      if (playing) { const on = (fr >> 5) % 2; face = { l: on ? 'happy' : 'star', r: on ? 'happy' : 'star', m: beat > .25 ? 'sing' : 'smile' }; return; }
+      if (fr > faceUntil && Math.random() < .004) {
+        const f = IDLE[Math.floor(Math.random() * IDLE.length)];
+        face = { l: f.l, r: f.r, m: f.m }; faceUntil = fr + 90 + Math.random() * 90; zzz = f.zzz ? faceUntil - fr : 0;
+      } else if (fr > faceUntil && face.l !== 'open' && face.l !== 'blink') face = { l: 'open', r: 'open', m: 'smile' };
+      if (fr >= blinkAt && fr > faceUntil) { face = { l: 'blink', r: 'blink', m: face.m }; if (fr > blinkAt + 6) { face = { l: 'open', r: 'open', m: 'smile' }; blinkAt = fr + 120 + Math.random() * 160; } }
     }
     function speak(text, ms = 2400) { say.textContent = text; say.classList.add('show'); clearTimeout(sayTimer); sayTimer = setTimeout(() => say.classList.remove('show'), ms); }
     function spawnNote() {
       const n = document.createElement('i'); n.className = 'ghost-note pix'; n.textContent = Math.random() < .5 ? '♪' : '♫';
       n.style.left = (30 + Math.random() * 50) + '%'; el.appendChild(n); setTimeout(() => n.remove(), 1600);
     }
-    /* 像游戏角色的待机动作：隔一会儿闪烁着瞬移到屏幕边缘的另一处 */
-    const SPOTS = () => innerWidth < 700 ? [['r', 14, 14], ['l', 14, 14]] : [['r', 18, 18], ['r', 18, 42], ['l', 18, 18], ['l', 18, 46]];
+    /* 像游戏角色的待机：隔一会儿倾斜着「飞」走，闪烁后出现在屏幕边缘的另一处 */
+    const SPOTS = () => innerWidth < 700 ? [['r', 10, 10], ['l', 10, 10]] : [['r', 14, 14], ['r', 14, 42], ['l', 14, 14], ['l', 14, 46]];
     function moveTo([side, x, yv]) {
       el.style.left = side === 'l' ? x + 'px' : ''; el.style.right = side === 'r' ? x + 'px' : '';
       el.style.bottom = yv > 30 ? yv + 'vh' : yv + 'px'; el.dataset.side = side;
     }
     function blinkTo(spot) {
-      glitch = 18; el.classList.add('blink');
-      setTimeout(() => { moveTo(spot); el.classList.remove('blink'); el.classList.add('appear'); glitch = 12; setTimeout(() => el.classList.remove('appear'), 500); }, 420);
+      glitch = 20; face = { l: 'wow', r: 'wow', m: 'o' }; faceUntil = fr + 50;
+      el.dataset.fly = spot[0] === el.dataset.side ? (spot[0] === 'r' ? 'up' : 'up-l') : (spot[0] === 'l' ? 'left' : 'right');
+      el.classList.add('blink');
+      setTimeout(() => { moveTo(spot); el.classList.remove('blink'); el.classList.add('appear'); glitch = 12; face = { l: 'happy', r: 'happy', m: 'grin' }; faceUntil = fr + 60; setTimeout(() => el.classList.remove('appear'), 520); }, 460);
     }
     function idle() {
       if (reduce) return;
-      const busy = music.isOpen() || el.matches(':hover');
-      if (!busy) {
+      if (!music.isOpen() && !hover) {
         const spots = SPOTS(), pick = spots[Math.floor(Math.random() * spots.length)];
-        if (Math.random() < .55) { blinkTo(pick); home = pick === spots[0]; }
+        if (Math.random() < .5) { blinkTo(pick); home = pick === spots[0]; }
         else glitch = 10;
         if (Math.random() < .6) setTimeout(() => speak(L(D.ghostLines[Math.floor(Math.random() * D.ghostLines.length)])), 900);
       }
-      idleTimer = setTimeout(idle, 7000 + Math.random() * 6000);
+      setTimeout(idle, 8000 + Math.random() * 7000);
     }
     $('#ghostBtn').addEventListener('click', () => {
       if (music.isOpen()) { music.close(); return; }
       music.open(); if (!music.isPlaying()) music.toggle();
     });
-    $('#ghostBtn').addEventListener('pointerenter', () => { glitch = 6; speak(t('ghost.hint'), 1600); });
+    $('#ghostBtn').addEventListener('pointerenter', () => { hover = true; glitch = 6; speak(t('ghost.hint'), 1600); });
+    $('#ghostBtn').addEventListener('pointerleave', () => { hover = false; });
     setInterval(() => { if (music.isPlaying() && !reduce) spawnNote(); }, 700);
     moveTo(SPOTS()[0]);
     requestAnimationFrame(draw);
     setTimeout(() => speak(L(D.ghostLines[0]), 2600), 2600);
-    idleTimer = setTimeout(idle, 9000);
+    setTimeout(idle, 9000);
     return { home() { if (!home) { blinkTo(SPOTS()[0]); home = true; } } };
   })();
 

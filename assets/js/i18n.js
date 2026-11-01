@@ -208,6 +208,20 @@ window.I18N = {
   'm.inst': ['伴奏', 'インスト', 'Instrumental'],
   'ghost.hint': ['点我听歌', 'タップで再生', 'Tap for music'],
 
+  /* ---------- 视频源 ---------- */
+  'v.bili': ['哔哩哔哩', 'ビリビリ', 'Bilibili'],
+  'v.biliSearch': ['在 B 站搜索', 'ビリビリで検索', 'Search on Bilibili'],
+  'v.help': [
+    '看到“请登录以确认你不是机器人”？这是 YouTube 对当前网络（常见于 VPN / 代理）的风控：在本浏览器登录 YouTube 后刷新即可，或点上方「哔哩哔哩」换源（国内无需代理）。',
+    '「ボットではないことを確認するためログイン」と表示されたら、YouTube が今のネットワーク（VPN・プロキシなど）を制限しています。このブラウザで YouTube にログインして再読み込みするか、上の「ビリビリ」に切り替えてください。',
+    'Seeing “Sign in to confirm you’re not a bot”? YouTube is flagging your network (often a VPN or proxy). Sign in to YouTube in this browser and reload, or switch to the Bilibili source above.'
+  ],
+  'v.helpNoBili': [
+    '看到“请登录以确认你不是机器人”？这是 YouTube 对当前网络（常见于 VPN / 代理）的风控：在本浏览器登录 YouTube 后刷新，或换个网络节点再试。',
+    '「ボットではないことを確認するためログイン」と表示されたら、このブラウザで YouTube にログインして再読み込みするか、別のネットワークでお試しください。',
+    'Seeing “Sign in to confirm you’re not a bot”? Sign in to YouTube in this browser and reload, or try a different network.'
+  ],
+
   /* ---------- 作品 ---------- */
   'disc.no': ['飞行雪绒 作品', 'フリート・スノーフラッフ 作品', 'Fleet Snowfluff Discography'],
   'disc.title': ['从网站样曲到毕业典礼', 'サイトのデモ曲から卒業式まで', 'From a Website Demo to the Graduation Stage'],

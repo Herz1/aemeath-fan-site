@@ -2,23 +2,23 @@
 window.DATA = {
   releaseDate: '2026-02-05',
 
-  /* 官方 YouTube 影像（频道：@WutheringWaves） */
+  /* 官方 YouTube 影像（频道：@WutheringWaves）；bili = 鸣潮官方 B 站账号（UID 1955897084）的同一支影像 */
   videos: [
     { id: '6lpiSBvawB0', cat: 'trailer',   date: '2026-02-01', t: ['3.1 版本 PV「赠予雪中的你」', 'Ver.3.1 PV「雪に抱かれた君へ」', 'Version 3.1 Official Trailer | For You Who Walk in Snow'] },
     { id: 'SoMek7TpNwM', cat: 'trailer',   date: '2026-02-03', t: ['3.1 版本 地图前瞻', 'Ver.3.1 エリア紹介', 'Version 3.1 Geographic Preview'] },
-    { id: '2_FwLf6y1-g', cat: 'trailer',   date: '2025-12-05', t: ['3.0 动画短片「转学生」', 'Ver.3.0 ショートアニメ「転校生」', 'Version 3.0 Cinematic Short | Transfer Student'] },
+    { id: '2_FwLf6y1-g', bili: 'BV1PZ2vBWEnQ', cat: 'trailer',   date: '2025-12-05', t: ['3.0 动画短片「转学生」', 'Ver.3.0 ショートアニメ「転校生」', 'Version 3.0 Cinematic Short | Transfer Student'] },
     { id: '60JiozUVswk', cat: 'trailer',   date: '2026-04-20', t: ['3.3 版本 PV「来自星海尽头的回响」', 'Ver.3.3 PV', 'Version 3.3 Official Trailer | Reverbs From the End of Galaxies'] },
-    { id: 'TnXzZxKmGYk', cat: 'cinematic', date: '2026-01-18', t: ['动画短片「拯救」', 'ショートアニメ「Salvation」', 'Cinematic Short | Salvation'] },
-    { id: 'XIvgewM4Mj4', cat: 'cinematic', date: '2026-02-17', t: ['剧情动画「我和你」', 'ストーリー映像「Me and You」', 'Story Cinematics | Me and You'] },
-    { id: 'ZRpHFIPp-0M', cat: 'cinematic', date: '2026-02-17', t: ['剧情动画「旅途愉快」', 'ストーリー映像「Journey Well」', 'Story Cinematics | Journey Well'] },
-    { id: 'm6kFRX_LBwg', cat: 'cinematic', date: '2026-05-11', t: ['剧情动画「人类之“心”」', 'ストーリー映像「Humanity’s “Heart”」', 'Story Cinematics | Humanity’s “Heart”'] },
+    { id: 'TnXzZxKmGYk', bili: 'BV13MrQBPEec', cat: 'cinematic', date: '2026-01-18', t: ['动画短片「拯救」', 'ショートアニメ「Salvation」', 'Cinematic Short | Salvation'] },
+    { id: 'XIvgewM4Mj4', bili: 'BV1NqFnzUEL4', cat: 'cinematic', date: '2026-02-17', t: ['剧情动画「我和你」', 'ストーリー映像「Me and You」', 'Story Cinematics | Me and You'] },
+    { id: 'ZRpHFIPp-0M', bili: 'BV1dMFEzfEXH', cat: 'cinematic', date: '2026-02-17', t: ['剧情动画「旅途愉快」', 'ストーリー映像「Journey Well」', 'Story Cinematics | Journey Well'] },
+    { id: 'm6kFRX_LBwg', bili: 'BV1RoRgBxEjh', cat: 'cinematic', date: '2026-05-11', t: ['剧情动画「人类之“心”」', 'ストーリー映像「Humanity’s “Heart”」', 'Story Cinematics | Humanity’s “Heart”'] },
     { id: '1BcYN4tRqOQ', cat: 'cinematic', date: '2026-05-16', t: ['拉海洛特别动画「远望者」', 'ラハイロイ特別映像「Farwatchers」', 'Lahai-Roi Special Cinematics | Farwatchers'] },
-    { id: 'psq5Izh9GHM', cat: 'showcase',  date: '2026-02-01', t: ['角色战斗演示 · 爱弥斯', '共鳴者 戦闘紹介・エイメス', 'Resonator Combat Showcase | Aemeath'] },
-    { id: 'H8gGJgMvr9w', cat: 'showcase',  date: '2026-02-03', t: ['角色演示 · 爱弥斯「毕业典礼」', '共鳴者紹介・エイメス「GRADUATION SHOW」', 'Resonator Showcase | Aemeath — GRADUATION SHOW'] },
+    { id: 'psq5Izh9GHM', bili: 'BV1qZ6yBXEVv', cat: 'showcase',  date: '2026-02-01', t: ['角色战斗演示 · 爱弥斯', '共鳴者 戦闘紹介・エイメス', 'Resonator Combat Showcase | Aemeath'] },
+    { id: 'H8gGJgMvr9w', bili: 'BV1EAFTzeEfY', cat: 'showcase',  date: '2026-02-03', t: ['角色演示 · 爱弥斯「毕业典礼」', '共鳴者紹介・エイメス「GRADUATION SHOW」', 'Resonator Showcase | Aemeath — GRADUATION SHOW'] },
     { id: 'P1Em1uuHzTc', cat: 'showcase',  date: '2026-01-03', t: ['共鸣者预告 · 爱弥斯', '共鳴者プレビュー・エイメス', 'Resonator Preview | Aemeath'] },
     { id: 'nvXcM1UAK9M', cat: 'music',     date: '2026-01-17', t: ['飞行雪绒 EP「Fallen Petals」', '飛行雪絨 EP「Fallen Petals」', 'Fleet Snowfluff EP — “Fallen Petals”'] },
     { id: '5_kJclPEjKM', cat: 'music',     date: '2026-01-17', t: ['飞行雪绒 EP「Indigo Universe」', '飛行雪絨 EP「Indigo Universe」', 'Fleet Snowfluff EP — “Indigo Universe”'] },
-    { id: 'lla6KQIXGKg', cat: 'music',     date: '2026-01-18', t: ['3.1 EP · 爱弥斯「Paper Plane」', 'EP3.1・エイメス「Paper Plane」', 'EP3.1 — Aemeath “Paper Plane”'] },
+    { id: 'lla6KQIXGKg', bili: 'BV1QAkcBtENr', cat: 'music',     date: '2026-01-18', t: ['3.1 EP · 爱弥斯「Paper Plane」', 'EP3.1・エイメス「Paper Plane」', 'EP3.1 — Aemeath “Paper Plane”'] },
     { id: 'BA5-6cVIRQQ', cat: 'music',     date: '2026-01-19', t: ['Paper Plane（音源）', 'Paper Plane（音源）', 'Paper Plane (Audio)'] },
     { id: 'buzNT-Tmb2M', cat: 'music',     date: '2025-12-31', t: ['琳奈的 Deadline Disco', 'リンネの Deadline Disco', 'Lynae’s Deadline Disco'] },
     { id: 'COrowyEzdug', cat: 'shorts',    date: '2026-02-13', t: ['幽灵来啦，嘘——', 'ゴースト参上、ばあっ——', 'Here comes the ghost, boo—'] },
@@ -30,7 +30,7 @@ window.DATA = {
     { id: 'NKwSNXFACCc', cat: 'shorts',    date: '2026-02-15', t: ['变身完成！猫猫英雄', '変身完了！ネコヒーロー', 'Transformation Complete! Cat Hero'] },
     { id: 'B_S-cQyFa_4', cat: 'shorts',    date: '2026-04-20', t: ['方块小剧场 · 星光交错 (6)', 'キューブシーン (6)', 'Post-Lament Cubescene — Stars Intertwined (6)'] },
     { id: 'WlpDD1c3V8w', cat: 'shorts',    date: '2025-12-30', t: ['内部频道特别节目「今天不休息」', 'インサイダーチャンネル「No Break Today」', 'Insider Channel: Special Program | No Break Today'] },
-    { id: '81Vxxh3zu9Q', cat: 'shorts',    date: '2025-12-14', t: ['星炬学院公开课「赫利俄斯的理论框架与技术路线」', 'スタートーチ学園 公開講義「Helios」', 'Startorch Academy Public Lecture — Helios'] }
+    { id: '81Vxxh3zu9Q', bili: 'BV1VDmLBnE8j', cat: 'shorts',    date: '2025-12-14', t: ['星炬学院公开课「赫利俄斯的理论框架与技术路线」', 'スタートーチ学園 公開講義「Helios」', 'Startorch Academy Public Lecture — Helios'] }
   ],
 
   /* 每个身份对应的影像 */
