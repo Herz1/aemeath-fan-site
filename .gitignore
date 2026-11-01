@@ -1,0 +1,8 @@
+# 早期会话留下、页面未使用的原始素材（体积大，只保留压缩后的 .webp）
+assets/img/official/*.gif
+assets/img/official/*.png
+assets/img/official/*.jpg
+assets/img/icons/*.png
+
+# 本地工具配置
+.claude/

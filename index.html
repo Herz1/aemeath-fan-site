@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>爱弥斯 应援站 | Aemeath Unofficial Fan Site</title>
+<meta name="description" content="非官方《鸣潮》爱弥斯粉丝站 · エイメス非公式ファンサイト · Unofficial Aemeath fan site — digital ghost, Exostrider pilot, Fleet Snowfluff, savior.">
+<meta name="theme-color" content="#070a1a">
+<link rel="icon" href="assets/img/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@600;900&family=Orbitron:wght@500;700;900&family=Shippori+Mincho:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-mode="hero">
+
+<!-- 加载 -->
+<div id="loader" aria-hidden="true">
+  <div class="loader-box">
+    <div class="loader-halo"></div>
+    <p class="mono" data-i18n="loader.l1"></p>
+    <p class="mono" data-i18n="loader.l2"></p>
+    <p class="mono"><span data-i18n="loader.l3"></span> <b id="loaderPct">0</b>%</p>
+    <div class="loader-bar"><i id="loaderBar"></i></div>
+    <button class="loader-skip mono" id="loaderSkip" data-i18n="loader.skip"></button>
+  </div>
+</div>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="noise" aria-hidden="true"></div>
+<div id="cursor" aria-hidden="true"></div>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- 顶栏 -->
+<header class="topbar">
+  <a href="#home" class="brand"><span class="brand-star">✦</span><span class="brand-name" data-i18n="hero.name"></span><em>fan site</em></a>
+  <nav class="nav" id="nav">
+    <a href="#profile" data-i18n="nav.profile"></a>
+    <a href="#identities" data-i18n="nav.identities"></a>
+    <a href="#voice" data-i18n="nav.voice"></a>
+    <a href="#music" data-i18n="nav.music"></a>
+    <a href="#chronicle" data-i18n="nav.chronicle"></a>
+    <a href="#stories" data-i18n="nav.stories"></a>
+    <a href="#videos" data-i18n="nav.videos"></a>
+    <a href="#gallery" data-i18n="nav.gallery"></a>
+    <a href="#fans" data-i18n="nav.fans"></a>
+    <a href="#sources" data-i18n="nav.sources"></a>
+  </nav>
+  <div class="lang" role="group" aria-label="Language">
+    <button data-setlang="zh">中</button><button data-setlang="ja">日</button><button data-setlang="en">EN</button>
+  </div>
+  <div class="lang vlang" role="group" aria-label="Voice language" title="Voice">
+    <span class="vlang-ic" aria-hidden="true">◉</span><button data-setvlang="zh">中</button><button data-setvlang="ja">日</button><button data-setvlang="en">EN</button>
+  </div>
+  <button class="burger" id="burger" aria-label="Menu"><i></i><i></i><i></i></button>
+</header>
+
+<main>
+<!-- ========== 首屏 ========== -->
+<section id="home" class="hero">
+  <div class="hero-bgword" aria-hidden="true">AEMEATH</div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <p class="kicker"><span data-i18n="hero.kicker"></span><i></i></p>
+      <h1 class="hero-name glitch" data-i18n="hero.name" data-glitch></h1>
+      <p class="hero-alt"><span data-i18n="hero.alt"></span> · <em data-i18n="hero.title"></em></p>
+      <p class="hero-lead" data-i18n="hero.lead"></p>
+      <button class="hero-quote" data-voice="Greeting"><span data-i18n="hero.quote"></span> <i class="hq-ic" aria-hidden="true">◉</i></button>
+      <div class="hero-cta">
+        <a href="#identities" class="btn btn-primary" data-i18n="hero.cta1"></a>
+        <button class="btn btn-ghost" data-play="6lpiSBvawB0">▶ <span data-i18n="hero.cta2"></span></button>
+      </div>
+    </div>
+    <div class="hero-visual" id="heroVisual">
+      <svg class="halo" viewBox="0 0 400 400" aria-hidden="true">
+        <defs><linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#7fe3ff"/><stop offset="1" stop-color="#ff9ad5"/></linearGradient></defs>
+        <circle cx="200" cy="200" r="180" fill="none" stroke="url(#hg)" stroke-width="1" stroke-dasharray="2 10" class="spin"/>
+        <circle cx="200" cy="200" r="150" fill="none" stroke="url(#hg)" stroke-width="2" stroke-dasharray="80 30 4 30" class="spin-rev"/>
+        <circle cx="200" cy="200" r="120" fill="none" stroke="#7fe3ff" stroke-opacity=".25" stroke-width="1"/>
+      </svg>
+      <img src="assets/img/official/sprite.webp" alt="爱弥斯 / Aemeath" class="hero-sprite" id="heroSprite">
+      <div class="hero-scan" aria-hidden="true"></div>
+    </div>
+    <aside class="hero-cards">
+      <button class="hcard" data-play="6lpiSBvawB0">
+        <img src="assets/img/official/walk-in-snow.webp" alt="">
+        <div><p class="tag">✦ <span data-i18n="hero.card1.tag"></span></p><h3 data-i18n="hero.card1.title"></h3><p class="meta" data-i18n="hero.card1.meta"></p></div>
+      </button>
+      <button class="hcard" data-music="1869997689">
+        <img src="assets/img/official/snowfluff-album.webp" alt="">
+        <div><p class="tag">♪ <span data-i18n="hero.card2.tag"></span></p><h3 data-i18n="hero.card2.title"></h3><p class="meta" data-i18n="hero.card2.meta"></p></div>
+      </button>
+      <div class="hcard hcount">
+        <p class="tag" data-i18n="hero.days"></p>
+        <p class="count"><b id="daysSince">0</b> <span data-i18n="hero.daysU"></span></p>
+        <p class="voice" id="voiceLine"></p>
+      </div>
+    </aside>
+  </div>
+  <a href="#profile" class="scroll-cue"><span data-i18n="hero.scroll"></span><i></i></a>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
+
+<!-- ========== 档案 ========== -->
+<section id="profile" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="profile.no"></p>
+    <h2 class="sec-title" data-i18n="profile.title"></h2>
+    <p class="sec-desc" data-i18n="profile.desc"></p>
+  </header>
+  <div class="profile-grid">
+    <figure class="profile-portrait reveal">
+      <img src="assets/img/official/card.webp" alt="Aemeath card art" loading="lazy">
+      <figcaption>© Kuro Games</figcaption>
+      <span class="corner tl"></span><span class="corner br"></span>
+    </figure>
+    <div class="profile-body">
+      <dl class="pdata reveal">
+        <div><dt data-i18n="p.name"></dt><dd>爱弥斯 · エイメス · Aemeath</dd></div>
+        <div><dt data-i18n="p.title"></dt><dd>长航的星辉 · Guiding Starlance</dd></div>
+        <div><dt data-i18n="p.alias"></dt><dd>飞行雪绒 · 飛行雪絨 · Fleet Snowfluff</dd></div>
+        <div><dt data-i18n="p.element"></dt><dd data-i18n="p.elementV"></dd></div>
+        <div><dt data-i18n="p.origin"></dt><dd data-i18n="p.originV"></dd></div>
+        <div><dt data-i18n="p.affil"></dt><dd data-i18n="p.affilV"></dd></div>
+        <div><dt data-i18n="p.weapon"></dt><dd data-i18n="p.weaponV"></dd></div>
+        <div><dt data-i18n="p.dish"></dt><dd data-i18n="p.dishV"></dd></div>
+        <div><dt data-i18n="p.release"></dt><dd data-i18n="p.releaseV"></dd></div>
+        <div class="wide"><dt data-i18n="p.cv"></dt><dd class="cv"><span><small>CN</small>王雅欣</span><span><small>JP</small>佐藤聡美</span><span><small>EN</small>Cara Theobold</span><span><small>KR</small>김하루</span></dd></div>
+      </dl>
+      <div class="pnotes">
+        <article class="pnote reveal"><h3 data-i18n="p.look.t"></h3><p data-i18n="p.look"></p></article>
+        <article class="pnote reveal"><h3 data-i18n="p.name.t"></h3><p data-i18n="p.name.d"></p></article>
+      </div>
+      <article class="record reveal" id="record">
+        <header><span class="mono" data-i18n="rec.title"></span><button class="mono rec-btn" id="recBtn" data-i18n="rec.decrypt"></button></header>
+        <p class="record-body mono" id="recBody"></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 四重身份 ========== -->
+<section id="identities" class="sec identities">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="id.no"></p>
+    <h2 class="sec-title" data-i18n="id.title"></h2>
+    <p class="sec-desc" data-i18n="id.desc"></p>
+  </header>
+
+  <div class="tuner reveal" role="tablist" id="tuner">
+    <div class="tuner-scale" aria-hidden="true"></div>
+    <button role="tab" data-id="ghost"><b>01</b><span data-i18n="tab.ghost"></span></button>
+    <button role="tab" data-id="exo"><b>02</b><span data-i18n="tab.exo"></span></button>
+    <button role="tab" data-id="singer"><b>03</b><span data-i18n="tab.singer"></span></button>
+    <button role="tab" data-id="savior"><b>04</b><span data-i18n="tab.savior"></span></button>
+    <i class="tuner-needle" id="tunerNeedle" aria-hidden="true"></i>
+  </div>
+
+  <!-- 01 电子幽灵 -->
+  <article class="ident ident-ghost" id="ident-ghost" data-mode="ghost">
+    <div class="ident-text">
+      <p class="ident-k mono" data-i18n="ghost.k"></p>
+      <h3 class="ident-h glitch" data-glitch data-i18n="ghost.h"></h3>
+      <p class="ident-sub" data-i18n="ghost.sub"></p>
+      <p data-i18n="ghost.p1"></p>
+      <p data-i18n="ghost.p2"></p>
+      <blockquote data-i18n="ghost.q"></blockquote>
+      <button class="voice-chip" data-voice="Self-Introduction">◉ <span data-i18n="voice.hear"></span> · <span data-vt="Self-Introduction"></span></button>
+      <ul class="stats">
+        <li><small data-i18n="ghost.stat1"></small><b data-i18n="ghost.stat1v"></b></li>
+        <li><small data-i18n="ghost.stat2"></small><b data-i18n="ghost.stat2v"></b></li>
+        <li><small data-i18n="ghost.stat3"></small><b data-i18n="ghost.stat3v"></b></li>
+      </ul>
+    </div>
+    <div class="ident-visual">
+      <div class="mirror" id="mirror">
+        <div class="mirror-empty"><span>NO REFLECTION</span></div>
+        <img src="assets/img/official/convene.webp" alt="" class="mirror-img" loading="lazy">
+        <div class="mirror-frame"></div>
+      </div>
+      <p class="hint" data-i18n="ghost.mirror"></p>
+    </div>
+    <div class="ident-videos"><p class="mono small" data-i18n="id.videos"></p><div class="vrow" data-vids="ghost"></div></div>
+  </article>
+
+  <!-- 02 隧者 -->
+  <article class="ident ident-exo" id="ident-exo" data-mode="exo">
+    <div class="ident-text">
+      <p class="ident-k mono" data-i18n="exo.k"></p>
+      <h3 class="ident-h" data-i18n="exo.h"></h3>
+      <p class="ident-sub" data-i18n="exo.sub"></p>
+      <p data-i18n="exo.p1"></p>
+      <p data-i18n="exo.p2"></p>
+      <blockquote data-i18n="exo.q"></blockquote>
+      <button class="voice-chip" data-voice="Chat_II">◉ <span data-i18n="voice.hear"></span> · <span data-vt="Chat_II"></span></button>
+    </div>
+    <div class="ident-visual">
+      <div class="hud" id="hud">
+        <img src="assets/img/official/splash.webp" alt="" class="hud-img" loading="lazy">
+        <svg class="hud-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="88" class="hud-track"/>
+          <circle cx="100" cy="100" r="88" class="hud-fill" id="hudFill"/>
+          <g class="hud-ticks"></g>
+        </svg>
+        <div class="hud-readout"><small class="mono">SYNC</small><b id="syncVal">0</b><small class="mono">%</small></div>
+        <div class="hud-corners"><i></i><i></i><i></i><i></i></div>
+        <p class="hud-over mono" data-i18n="exo.over"></p>
+        <ul class="hud-log mono" id="hudLog"></ul>
+      </div>
+      <button class="btn btn-exo" id="syncBtn"><span data-i18n="exo.hold"></span></button>
+      <p class="hint" data-i18n="exo.hint"></p>
+    </div>
+    <div class="ident-videos"><p class="mono small" data-i18n="id.videos"></p><div class="vrow" data-vids="exo"></div></div>
+  </article>
+
+  <!-- 03 飞行雪绒 -->
+  <article class="ident ident-singer" id="ident-singer" data-mode="singer">
+    <div class="ident-text">
+      <p class="ident-k mono" data-i18n="singer.k"></p>
+      <h3 class="ident-h" data-i18n="singer.h"></h3>
+      <p class="ident-sub" data-i18n="singer.sub"></p>
+      <p data-i18n="singer.p1"></p>
+      <p data-i18n="singer.p2"></p>
+      <blockquote data-i18n="singer.q"></blockquote>
+      <button class="voice-chip" data-voice="Thoughts_I">◉ <span data-i18n="voice.hear"></span> · <span data-vt="Thoughts_I"></span></button>
+    </div>
+    <div class="ident-visual">
+      <div class="retro">
+        <div class="retro-bar"><span>✿ <span data-i18n="singer.site"></span> ✿</span><i>_</i><i>□</i><i>×</i></div>
+        <div class="retro-body">
+          <div class="retro-marquee"><span>★ Welcome to fltsnflf’s room ★ ようこそ ★ 欢迎来到飞行雪绒的小屋 ★ new demo coming soon…? ★</span></div>
+          <div class="retro-top">
+            <div class="unmask" tabindex="0">
+              <img src="assets/img/official/snowfluff.webp" alt="Fleet Snowfluff avatar" class="um-a">
+              <img src="assets/img/official/icon.webp" alt="Aemeath" class="um-b">
+            </div>
+            <div class="retro-info">
+              <p class="pix">FLEET SNOWFLUFF</p>
+              <p class="pix small" data-i18n="singer.updated"></p>
+              <p class="pix small"><span data-i18n="singer.visitors"></span>: <b class="counter" id="visitors">0000000</b></p>
+              <div class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+          </div>
+          <p class="hint pix small" data-i18n="singer.unmask"></p>
+          <ol class="songs" id="songs"></ol>
+        </div>
+      </div>
+    </div>
+    <div class="ident-videos"><p class="mono small" data-i18n="id.videos"></p><div class="vrow" data-vids="singer"></div></div>
+  </article>
+
+  <!-- 04 救世主 -->
+  <article class="ident ident-savior" id="ident-savior" data-mode="savior">
+    <div class="ident-text">
+      <p class="ident-k mono" data-i18n="savior.k"></p>
+      <h3 class="ident-h" data-i18n="savior.h"></h3>
+      <p class="ident-sub" data-i18n="savior.sub"></p>
+      <div class="spoiler" id="spoiler">
+        <div class="spoiler-cover"><p data-i18n="savior.spoiler"></p><button class="btn btn-gold" id="spoilerBtn" data-i18n="savior.reveal"></button></div>
+        <div class="spoiler-body">
+          <p data-i18n="savior.p1"></p>
+          <p data-i18n="savior.p2"></p>
+          <p data-i18n="savior.p3"></p>
+          <blockquote data-i18n="savior.q"></blockquote>
+          <button class="voice-chip" data-voice="Thoughts_V">◉ <span data-i18n="voice.hear"></span> · <span data-vt="Thoughts_V"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="ident-visual">
+      <div class="loop" id="loop">
+        <svg viewBox="0 0 400 400" aria-hidden="true">
+          <defs><linearGradient id="lg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffe48a"/><stop offset="1" stop-color="#ff9ad5"/></linearGradient></defs>
+          <circle cx="200" cy="200" r="150" class="loop-track"/>
+          <circle cx="200" cy="200" r="150" class="loop-flow"/>
+          <g id="loopPlane"><path d="M-14 -6 L16 0 L-14 6 L-8 0 Z" fill="#fff"/></g>
+        </svg>
+        <div class="loop-nodes" id="loopNodes"></div>
+        <div class="loop-center" id="loopCenter"><b>∞</b><p></p></div>
+      </div>
+      <p class="hint" data-i18n="loop.hint"></p>
+    </div>
+    <div class="ident-videos"><p class="mono small" data-i18n="id.videos"></p><div class="vrow" data-vids="savior"></div></div>
+  </article>
+</section>
+
+<!-- ========== 声音档案 ========== -->
+<section id="voice" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="voice.no"></p>
+    <h2 class="sec-title" data-i18n="voice.title"></h2>
+    <p class="sec-desc" data-i18n="voice.desc"></p>
+  </header>
+  <div class="voice-wrap">
+    <div class="vstage" id="vstage">
+      <div class="vscope">
+        <canvas id="vscope" width="440" height="440" aria-hidden="true"></canvas>
+        <button class="vscope-btn" id="vplay" aria-label="Play"><img src="assets/img/official/icon.webp" alt=""><span id="vplayIcon">▶</span></button>
+      </div>
+      <p class="vmeta-line mono"><span id="vcat"></span> · <span id="vtime">0:00 / 0:00</span></p>
+      <h3 class="vtitle" id="vtitle"></h3>
+      <p class="vtext" id="vtext"></p>
+      <p class="vtrans" id="vtrans"></p>
+      <div class="vctrl">
+        <button class="btn btn-ghost" id="vprev" aria-label="Previous">‹</button>
+        <label class="vauto"><input type="checkbox" id="vauto"> <span data-i18n="voice.auto"></span></label>
+        <button class="btn btn-ghost" id="vnext" aria-label="Next">›</button>
+      </div>
+      <p class="small dim" id="vwarn" hidden data-i18n="voice.ogg"></p>
+    </div>
+    <div class="vlist-wrap">
+      <div class="filters" id="vcats"></div>
+      <ol class="vlist" id="vlist"></ol>
+      <p class="small dim" data-i18n="voice.credit"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 飞行雪绒 作品 ========== -->
+<section id="music" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="disc.no"></p>
+    <h2 class="sec-title" data-i18n="disc.title"></h2>
+    <p class="sec-desc" data-i18n="disc.desc"></p>
+  </header>
+  <div class="disco" id="disco"></div>
+</section>
+
+<!-- ========== 年表 ========== -->
+<section id="chronicle" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="chron.no"></p>
+    <h2 class="sec-title" data-i18n="chron.title"></h2>
+    <p class="sec-desc" data-i18n="chron.desc"></p>
+  </header>
+  <ol class="timeline" id="timeline"><i class="tl-line"><i id="tlFill"></i></i></ol>
+</section>
+
+<!-- ========== 故事 ========== -->
+<section id="stories" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="stories.no"></p>
+    <h2 class="sec-title" data-i18n="stories.title"></h2>
+    <p class="sec-desc" data-i18n="stories.desc"></p>
+  </header>
+  <div class="story-grid" id="storyGrid"></div>
+  <h3 class="sub-title reveal" data-i18n="stories.items"></h3>
+  <div class="item-grid" id="itemGrid"></div>
+</section>
+
+<!-- ========== 细节考据 ========== -->
+<section id="details" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="det.no"></p>
+    <h2 class="sec-title" data-i18n="det.title"></h2>
+    <p class="sec-desc" data-i18n="det.desc"></p>
+  </header>
+  <div class="det-grid" id="detGrid"></div>
+</section>
+
+<!-- ========== 影像 ========== -->
+<section id="videos" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="video.no"></p>
+    <h2 class="sec-title" data-i18n="video.title"></h2>
+    <p class="sec-desc" data-i18n="video.desc"></p>
+  </header>
+  <div class="feature reveal" id="feature"></div>
+  <div class="filters" id="vfilters">
+    <button data-f="all" class="on" data-i18n="vf.all"></button>
+    <button data-f="trailer" data-i18n="vf.trailer"></button>
+    <button data-f="cinematic" data-i18n="vf.cinematic"></button>
+    <button data-f="showcase" data-i18n="vf.showcase"></button>
+    <button data-f="music" data-i18n="vf.music"></button>
+    <button data-f="shorts" data-i18n="vf.shorts"></button>
+  </div>
+  <div class="vgrid" id="vgrid"></div>
+</section>
+
+<!-- ========== 画廊 ========== -->
+<section id="gallery" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="gal.no"></p>
+    <h2 class="sec-title" data-i18n="gal.title"></h2>
+    <p class="sec-desc" data-i18n="gal.desc"></p>
+  </header>
+  <h3 class="sub-title reveal" data-i18n="gal.official"></h3>
+  <div class="masonry" id="masonry"></div>
+  <h3 class="sub-title reveal" data-i18n="gal.pixiv"></h3>
+  <p class="small dim gal-note" data-i18n="gal.pixivNote"></p>
+  <div class="pix-grid" id="pixGrid"></div>
+  <h3 class="sub-title reveal" data-i18n="gal.x"></h3>
+  <div class="x-grid" id="xGrid"></div>
+  <h3 class="sub-title reveal" data-i18n="gal.fan"></h3>
+  <div class="fan-grid" id="fanGrid"></div>
+  <h3 class="sub-title reveal" data-i18n="gal.local"></h3>
+  <div class="fan-local" id="fanLocal"></div>
+  <div class="fan-links reveal"><p class="mono small" data-i18n="gal.more"></p><div id="fanLinks"></div></div>
+</section>
+
+<!-- ========== 应援 ========== -->
+<section id="fans" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="fans.no"></p>
+    <h2 class="sec-title" data-i18n="fans.title"></h2>
+    <p class="sec-desc" data-i18n="fans.desc"></p>
+  </header>
+  <div class="fans-grid">
+    <div class="panel see reveal">
+      <h3 data-i18n="fans.see"></h3>
+      <p data-i18n="fans.seeDesc"></p>
+      <button class="see-btn" id="seeBtn"><img src="assets/img/official/icon.webp" alt=""><span data-i18n="fans.see"></span></button>
+      <p class="see-done mono small" id="seeDone"></p>
+      <div class="see-stats"><div><b id="streak">0</b><small data-i18n="fans.streak"></small></div><div><b id="total">0</b><small data-i18n="fans.total"></small></div></div>
+      <div class="week" id="week"></div>
+    </div>
+    <div class="panel plane-panel reveal">
+      <h3 data-i18n="fans.plane"></h3>
+      <p data-i18n="fans.planeDesc"></p>
+      <form id="planeForm"><textarea id="planeText" maxlength="140" rows="3" data-i18n-ph="fans.planePh"></textarea><button class="btn btn-primary" data-i18n="fans.send"></button></form>
+      <p class="mono small" data-i18n="fans.wall"></p>
+      <ul class="plane-wall" id="planeWall"></ul>
+    </div>
+    <div class="panel secret reveal">
+      <h3>🔒 <span data-i18n="fans.secret"></span></h3>
+      <p data-i18n="fans.secretDesc"></p>
+      <div class="keypad" id="keypad" aria-hidden="true"><span>_</span><span>_</span><span>_</span><span>_</span></div>
+      <p class="mono small dim" data-i18n="fans.secretHint"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 出处 ========== -->
+<section id="sources" class="sec">
+  <header class="sec-head reveal">
+    <p class="sec-no" data-i18n="src.no"></p>
+    <h2 class="sec-title" data-i18n="src.title"></h2>
+    <p class="sec-desc" data-i18n="src.desc"></p>
+  </header>
+  <div class="src-grid" id="srcGrid"></div>
+</section>
+</main>
+
+<footer class="footer">
+  <p class="foot-star">✦</p>
+  <p data-i18n="foot.made"></p>
+  <p class="small dim" data-i18n="foot.disc"></p>
+</footer>
+
+<!-- 飞行雪绒：像素电子幽灵 + 音乐播放器 -->
+<div class="ghost" id="ghost">
+  <p class="ghost-say pix" id="ghostSay" aria-hidden="true"></p>
+  <button class="ghost-btn" id="ghostBtn" aria-label="Fleet Snowfluff player">
+    <canvas id="ghostCv" width="32" height="34"></canvas>
+  </button>
+  <i class="ghost-shadow" aria-hidden="true"></i>
+</div>
+<div class="mplayer" id="mplayer" role="dialog" aria-label="Fleet Snowfluff player">
+  <header>
+    <div><b class="pix" data-i18n="radio.title"></b><small data-i18n="radio.sub"></small></div>
+    <button class="x" id="mClose" aria-label="Close">×</button>
+  </header>
+  <div class="m-now">
+    <img id="mCover" src="assets/img/covers/1869997689.webp" alt="">
+    <div class="m-info"><p class="m-title" id="mTitle"></p><p class="m-rel" id="mRel"></p><p class="m-tag pix" id="mTag"></p></div>
+  </div>
+  <canvas class="m-viz" id="mViz" width="300" height="44" aria-hidden="true"></canvas>
+  <div class="m-seek" id="mSeek" role="slider" aria-label="Seek" tabindex="0"><i id="mBar"></i></div>
+  <div class="m-ctrl">
+    <span class="m-time mono" id="mTime">0:00 / 0:30</span>
+    <button id="mPrev" aria-label="Previous">⏮</button>
+    <button id="mPlay" class="m-play" aria-label="Play">▶</button>
+    <button id="mNext" aria-label="Next">⏭</button>
+    <span class="m-links" id="mLinks"></span>
+  </div>
+  <p class="m-note small" id="mNote"></p>
+  <ol class="m-queue" id="mQueue"></ol>
+</div>
+
+<!-- 影像弹窗 -->
+<div class="modal" id="vmodal" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-box"><button class="x" data-close aria-label="Close">×</button><div class="ratio" id="vframe"></div><p class="modal-cap" id="vcap"></p></div>
+</div>
+
+<!-- 图片灯箱 -->
+<div class="modal" id="lightbox" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <button class="lb-nav prev" id="lbPrev" aria-label="Previous">‹</button>
+  <figure class="lb-fig"><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <button class="lb-nav next" id="lbNext" aria-label="Next">›</button>
+  <button class="x lb-x" data-close aria-label="Close">×</button>
+</div>
+
+<!-- 隐藏房间 -->
+<div class="modal" id="blocks" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-box blocks-box">
+    <button class="x" data-close aria-label="Close">×</button>
+    <h3 class="pix" data-i18n="blocks.title"></h3>
+    <p class="small" data-i18n="blocks.help"></p>
+    <canvas id="blocksCanvas" width="320" height="420"></canvas>
+    <p class="mono small"><span>SCORE</span> <b id="bScore">0</b> · <span data-i18n="blocks.best"></span> <b id="bBest">0</b></p>
+    <p class="mono small" id="bMsg"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="subbar" id="subbar" aria-live="polite"><button class="x" id="subStop" aria-label="Stop">■</button><p><b id="subTitle"></b><span id="subText"></span></p></div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/fanart.js"></script>
+<script src="assets/js/voice.js"></script>
+<script src="assets/js/itunes.js"></script>
+<script src="assets/js/fanart-pixiv.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
