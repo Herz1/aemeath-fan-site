@@ -302,6 +302,8 @@ window.DATA = {
       ['Wuthering Waves Wiki · Aemeath/Gallery', 'https://wutheringwaves.fandom.com/wiki/Aemeath/Gallery'],
       ['Wuthering Waves Wiki · Fleet Snowfluff', 'https://wutheringwaves.fandom.com/wiki/Fleet_Snowfluff'],
       ['Wuthering Waves Wiki · Aemeath/Voicelines（中 / 日 / 英）', 'https://wutheringwaves.fandom.com/wiki/Aemeath/Voicelines/Chinese'],
+      ['像素小人待机动画素材 · gitee lzy-buaa-jdi/ameath（MIT；GIF 原素材：B 站 @_BLZ_）', 'https://gitee.com/lzy-buaa-jdi/ameath'],
+      ['Aemeath Mini Codex Pet · cuNuo（同一素材的整理版）', 'https://github.com/cuNuo/aemeath-mini-codex-pet'],
       ['pixiv 百科事典 · エイメス', 'https://dic.pixiv.net/a/%E3%82%A8%E3%82%A4%E3%83%A1%E3%82%B9'],
       ['Wuthering Waves Wiki · Starlights from Yesterdays', 'https://wutheringwaves.fandom.com/wiki/Starlights_from_Yesterdays'],
       ['Wuthering Waves Wiki · Exostrider', 'https://wutheringwaves.fandom.com/wiki/Exostrider'],

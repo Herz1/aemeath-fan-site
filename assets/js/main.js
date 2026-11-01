@@ -706,139 +706,137 @@
     return { pause() { audio.pause(); }, toggle, isPlaying: () => !audio.paused, open: openPanel, close: closePanel, isOpen: () => panel.classList.contains('open') };
   })();
 
-  /* ---------- 像素电子幽灵「飞行雪绒」：按游戏内待机小人重绘——大头、光环、机械羽翼；
-     待机时会眨眼、换表情、扇动羽翼，隔一会儿以倾斜的飞行姿态瞬移；点击即播放器 ---------- */
+  /* ---------- 像素电子幽灵「飞行雪绒」：直接使用游戏内像素小人的待机动画素材
+     （gitee.com/lzy-buaa-jdi/ameath，MIT；GIF 原素材 B 站 @_BLZ_）。
+     状态机：待机呼吸 → 随机小动作；移动时播放行走动画并横穿屏幕；点击播放被抓起的动作；
+     放音乐时扇翅膀；长时间无操作就像游戏里一样趴到屏幕底边探头 ---------- */
   const ghost = (function () {
-    const el = $('#ghost'), cv = $('#ghostCv'), g = cv.getContext('2d'), say = $('#ghostSay');
-    const W = cv.width, H = cv.height;           /* 64 × 56 */
-    const HX = 17, HY = 13;                      /* 头部网格左上角 */
-    const HEAD = [
-      '..............KK..............', '.............KhK..............', '..........KKKKPKKKK...........', '........KKPPPPPPPPPKK.........',
-      '......KKPPhhPPPPPPPPPKK.......', '.....KPPhhPPPPPPPPPPPPPK......', '....KPPPPPPPPPPPPPPPPPPPK.....', '...KPPPPPpPPPPPPPPPpPPPPPK....',
-      '...KPPPPpPPPPPPPPPPPpPPPPK....', '..KPPPPpSSpPPPPPPPpSSpPPPBK...', '..KPPPpSSSSpPPPPPpSSSSpPBBK...', '..KPPPSSSSSSSSSSSSSSSSSPPBK...',
-      '..KPPSSSSSSSSSSSSSSSSSSSPPK...', '..KPPSSeeeeSSSSSSSSeeeeSPPK...', '..KPPSSeeeeSSSSSSSSeeeeSPPK...', '..KPpSSeeeeSSSSSSSSeeeeSpPK...',
-      '..KPpSSCCSSSSSSSSSSSSCCSpPK...', '..KPPpSSSSSSSSSSSSSSSSpPPPK...', '...KPPpSSSSSSSSSSSSSSpPPPYK...', '...KPPPKKSSSSSSSSSSKKPPPYYK...',
-      '....KPPK.KKSSSSSSKK.KPPYK.....', '....KPK..KWWWWWWWWK..KYK......', '.....K...KWWbBBbWWK...K.......', '.........KWWWBBWWWK...........',
-      '........KWWWWWWWWWWK..........', '........KWwWWWWWWwWK..........', '.........KKWWWWWWKK...........', '..........KSK..KSK............',
-      '..........KSK..KSK............', '..........KWK..KWK............', '...........K....K.............'
-    ].map(r => r.padEnd(30, '.').slice(0, 30));
-    const PAL = { K: '#3a2147', P: '#ff9ccb', p: '#e46aa8', h: '#ffd6ec', Y: '#ffe48a', S: '#ffece2', C: '#ff9ab5', W: '#f7f6ff', w: '#c8c4e6', B: '#7fe3ff', b: '#3a8fd6',
-      k: '#5a2a1a', G: '#ffcf4a', g: '#e89a2a', R: '#ff5a8a', E: '#ffffff' };
-    /* 表情：眼睛 4×3（左眼，右眼自动镜像），嘴 4×2 */
-    const EYES = {
-      open: ['KKKK', 'kkEk', 'gGGg'], look: ['KKKK', 'kEkk', 'gGGg'], happy: ['.KK.', 'K..K', '....'], blink: ['....', 'KKKK', '....'],
-      wow: ['KKKK', 'kEEk', 'kkkk'], sleepy: ['....', '....', 'KKKK'], star: ['.GG.', 'GEEG', '.GG.']
-    };
-    const MOUTH = { smile: ['K..K', '.KK.'], grin: ['.KK.', 'KRRK'], o: ['.KK.', '.KK.'], flat: ['....', '.KK.'], sing: ['KKKK', 'KRRK'] };
-    const mirror = rows => rows.map(r => [...r].reverse().join(''));
-    let fr = 0, glitch = 0, sayTimer = 0, home = true, hover = false;
-    let face = { l: 'open', r: 'open', m: 'smile' }, faceUntil = 0, blinkAt = 90, zzz = 0;
+    const el = $('#ghost'), cv = $('#ghostCv'), g = cv.getContext('2d'), say = $('#ghostSay'), btn = $('#ghostBtn');
+    const C = window.CHIBI || {}, F = 200;
+    const img = {};
+    Object.keys(C).forEach(k => { const i = new Image(); i.src = `assets/img/chibi/${k}.webp`; img[k] = i; });
+    const EXTRAS = ['idle1', 'idle3', 'idle4'];
+    const SCREENS = ['screen1', 'screen2', 'screen3', 'screen4', 'screen5', 'screen6', 'screen7'];
+    let anim = 'idle2', frame = 0, acc = 0, last = performance.now(), loop = true, onEnd = null, flip = false;
+    let glitch = 0, sayTimer = 0, lastInput = Date.now(), mode = 'idle', hover = false, side = 'r', home = true, screenTimer = 0;
 
-    const px = (x, y, c, a = 1) => { if (c === '.') return; g.globalAlpha = a; g.fillStyle = PAL[c] || c; g.fillRect(x, y, 1, 1); };
-    function blade(x0, y0, ang, len) {
-      const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
-      for (let i = 3; i <= len; i++) {
-        const w = i < len - 4 ? .9 : (len - i) * .22 + .1;      /* 细长刃片，刃尖收窄 */
-        const cx = x0 + dx * i, cy = y0 + dy * i;
-        for (let s = -w - .9; s <= w + .9; s += .45) px(Math.round(cx + nx * s), Math.round(cy + ny * s), '#2a2644');
-        for (let s = -w; s <= w; s += .45) px(Math.round(cx + nx * s), Math.round(cy + ny * s), s < -.2 ? '#f4f2ff' : '#9d97cf');
-      }
-      if ((fr >> 4) % 6 === 0) px(Math.round(x0 + dx * len), Math.round(y0 + dy * len), '#7fe3ff');
+    const base = () => music.isPlaying() ? 'idle4' : 'idle2';
+    function play(name, opts = {}) {
+      if (!C[name]) return;
+      anim = name; frame = 0; acc = 0; loop = !!opts.loop; onEnd = opts.then || null;
+      if (opts.flip !== undefined) flip = opts.flip;
     }
-    function draw() {
-      fr++;
-      const playing = music.isPlaying(), beat = window.__beat || 0;
-      g.clearRect(0, 0, W, H);
-      const bob = Math.round(Math.sin(fr / 22) * 1.5 + beat * 2);
-      const flap = Math.sin(fr / (playing ? 6 : 11)) * (playing ? .22 : .13);
-      /* 机械羽翼（在身体后面） */
-      const LA = [138, 157, 176, 195, 214], LEN = [19, 23, 25, 22, 17];
-      LA.forEach((a, i) => {
-        const r = (a * Math.PI / 180) - flap * (i + 1) / 3;
-        blade(HX + 9, HY + 22 + bob, r, LEN[i]);
-        blade(HX + 18, HY + 22 + bob, Math.PI - r, LEN[i]);
-      });
-      /* 光环：紧贴头顶的椭圆弧 + 顶端菱形，轻微滞后于头部摆动并闪烁（先画，让头发压住两端） */
-      const hb = Math.round(Math.sin((fr - 8) / 22) * 1.5), hcx = HX + 15, hcy = HY + 5 + hb;
-      const ha = .6 + .4 * Math.abs(Math.sin(fr / 16));
-      for (let a = Math.PI * 1.04; a <= Math.PI * 1.96; a += .04) px(Math.round(hcx + Math.cos(a) * 15), Math.round(hcy + Math.sin(a) * 6), (Math.round(a * 25) % 3) ? '#7fe3ff' : '#e9fbff', ha);
-      [[0, -2], [-1, -1], [0, -1], [1, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]].forEach(([x, y]) => px(hcx + x, hcy - 8 + y, x === 0 && y === 0 ? '#ffffff' : '#7fe3ff', ha));
-      /* 头与身体 */
-      for (let y = 0; y < HEAD.length; y++) {
-        const shift = glitch && Math.random() < .2 ? (Math.random() < .5 ? -1 : 1) : 0;
-        for (let x = 0; x < 30; x++) {
-          let c = HEAD[y][x]; if (c === '.') continue;
-          if (c === 'e') c = 'S';
-          let a = 1;
-          if (y >= 27) { if ((x + y + (fr >> 3)) % 3 === 0) continue; a = .75 - (y - 27) * .15; }   /* 电子幽灵：脚下逐渐消散 */
-          px(HX + x + shift, HY + y + bob, c, a);
+    function draw(now) {
+      const dt = Math.min(200, now - last); last = now;
+      const meta = C[anim];
+      if (meta) {
+        acc += dt;
+        while (acc >= meta.d[frame]) {
+          acc -= meta.d[frame]; frame++;
+          if (frame >= meta.n) {
+            if (loop) frame = 0;
+            else { frame = meta.n - 1; const f = onEnd; onEnd = null; if (f) f(); else play(base(), { loop: true }); break; }
+          }
         }
       }
-      /* 表情 */
-      const L = EYES[face.l], R = mirror(EYES[face.r]);
-      for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) { px(HX + 7 + x, HY + 13 + y + bob, L[y][x]); px(HX + 19 + x, HY + 13 + y + bob, R[y][x]); }
-      const M = MOUTH[face.m];
-      for (let y = 0; y < 2; y++) for (let x = 0; x < 4; x++) px(HX + 13 + x, HY + 17 + y + bob, M[y][x]);
-      if (zzz) { const zy = HY + 2 - (fr % 60) / 10; px(HX + 27, Math.round(zy), '#e9fbff', .8); px(HX + 28, Math.round(zy) - 3, '#e9fbff', .6); zzz--; }
-      g.globalAlpha = 1;
-      if (glitch) glitch--;
-      think(playing, beat);
-      el.style.setProperty('--beat', beat.toFixed(3));
+      g.clearRect(0, 0, F, F);
+      const im = img[anim];
+      if (im && im.complete && im.naturalWidth) {
+        g.save();
+        if (flip) { g.translate(F, 0); g.scale(-1, 1); }
+        if (glitch > 0) {
+          /* 电子幽灵的信号干扰：按横条错位 */
+          for (let y = 0; y < F; y += 8) { const off = Math.random() < .3 ? (Math.random() < .5 ? -7 : 7) : 0; g.drawImage(im, frame * F, y, F, 8, off, y, F, 8); }
+          glitch--;
+        } else g.drawImage(im, frame * F, 0, F, F, 0, 0, F, F);
+        g.restore();
+      }
+      el.style.setProperty('--beat', (window.__beat || 0).toFixed(3));
       requestAnimationFrame(draw);
     }
-    /* 待机 AI：眨眼、换表情；播放音乐时跟着节拍唱 */
-    const IDLE = [
-      { l: 'happy', r: 'happy', m: 'grin' }, { l: 'open', r: 'happy', m: 'smile' }, { l: 'wow', r: 'wow', m: 'o' },
-      { l: 'look', r: 'look', m: 'flat' }, { l: 'sleepy', r: 'sleepy', m: 'flat', zzz: true }, { l: 'star', r: 'star', m: 'grin' }
-    ];
-    function think(playing, beat) {
-      if (hover) { face = { l: 'happy', r: 'happy', m: 'grin' }; return; }
-      if (playing) { const on = (fr >> 5) % 2; face = { l: on ? 'happy' : 'star', r: on ? 'happy' : 'star', m: beat > .25 ? 'sing' : 'smile' }; return; }
-      if (fr > faceUntil && Math.random() < .004) {
-        const f = IDLE[Math.floor(Math.random() * IDLE.length)];
-        face = { l: f.l, r: f.r, m: f.m }; faceUntil = fr + 90 + Math.random() * 90; zzz = f.zzz ? faceUntil - fr : 0;
-      } else if (fr > faceUntil && face.l !== 'open' && face.l !== 'blink') face = { l: 'open', r: 'open', m: 'smile' };
-      if (fr >= blinkAt && fr > faceUntil) { face = { l: 'blink', r: 'blink', m: face.m }; if (fr > blinkAt + 6) { face = { l: 'open', r: 'open', m: 'smile' }; blinkAt = fr + 120 + Math.random() * 160; } }
-    }
+
     function speak(text, ms = 2400) { say.textContent = text; say.classList.add('show'); clearTimeout(sayTimer); sayTimer = setTimeout(() => say.classList.remove('show'), ms); }
     function spawnNote() {
       const n = document.createElement('i'); n.className = 'ghost-note pix'; n.textContent = Math.random() < .5 ? '♪' : '♫';
       n.style.left = (30 + Math.random() * 50) + '%'; el.appendChild(n); setTimeout(() => n.remove(), 1600);
     }
-    /* 像游戏角色的待机：隔一会儿倾斜着「飞」走，闪烁后出现在屏幕边缘的另一处 */
-    const SPOTS = () => innerWidth < 700 ? [['r', 10, 10], ['l', 10, 10]] : [['r', 14, 14], ['r', 14, 42], ['l', 14, 14], ['l', 14, 46]];
-    function moveTo([side, x, yv]) {
-      el.style.left = side === 'l' ? x + 'px' : ''; el.style.right = side === 'r' ? x + 'px' : '';
-      el.style.bottom = yv > 30 ? yv + 'vh' : yv + 'px'; el.dataset.side = side;
+
+    /* 位置：用 left/bottom 像素定位，移动时由 CSS 过渡 */
+    const size = () => el.offsetWidth || 140;
+    const spots = () => {
+      const w = size(), r = innerWidth - w - 10;
+      return innerWidth < 700 ? [{ s: 'r', x: r, b: 8 }, { s: 'l', x: 10, b: 8 }]
+        : [{ s: 'r', x: r, b: 10 }, { s: 'r', x: r, b: Math.round(innerHeight * .4) }, { s: 'l', x: 10, b: 10 }, { s: 'l', x: 10, b: Math.round(innerHeight * .45) }];
+    };
+    let pos = null;
+    function place(p, animate) {
+      el.classList.toggle('moving', !!animate);
+      el.style.right = ''; el.style.left = p.x + 'px'; el.style.bottom = p.b + 'px'; el.dataset.side = p.s; pos = p;
     }
-    function blinkTo(spot) {
-      glitch = 20; face = { l: 'wow', r: 'wow', m: 'o' }; faceUntil = fr + 50;
-      el.dataset.fly = spot[0] === el.dataset.side ? (spot[0] === 'r' ? 'up' : 'up-l') : (spot[0] === 'l' ? 'left' : 'right');
-      el.classList.add('blink');
-      setTimeout(() => { moveTo(spot); el.classList.remove('blink'); el.classList.add('appear'); glitch = 12; face = { l: 'happy', r: 'happy', m: 'grin' }; faceUntil = fr + 60; setTimeout(() => el.classList.remove('appear'), 520); }, 460);
+    function walkTo(p) {
+      if (!pos || (pos.x === p.x && pos.b === p.b)) return place(p, false);
+      /* move.gif 朝左；向右走时镜像 */
+      const toRight = p.x > pos.x;
+      play('move', { loop: true, flip: toRight });
+      glitch = 8;
+      place(p, true);
+      clearTimeout(walkTo.t);
+      walkTo.t = setTimeout(() => { el.classList.remove('moving'); flip = false; play('idle3', { flip: false }); }, 2300);
     }
+
+    /* 长时间无操作：像游戏里的屏幕待机彩蛋一样，趴到屏幕底边探头 */
+    function enterScreen() {
+      if (mode === 'screen' || music.isOpen() || music.isPlaying()) return;
+      mode = 'screen'; el.classList.add('screen');
+      const p = spots()[0]; place({ ...p, b: 0 }, true);
+      const next = () => { play(SCREENS[Math.floor(Math.random() * SCREENS.length)], { loop: true, flip: false }); screenTimer = setTimeout(next, 5000 + Math.random() * 4000); };
+      setTimeout(next, 600);
+    }
+    function exitScreen() {
+      if (mode !== 'screen') return;
+      mode = 'idle'; clearTimeout(screenTimer); el.classList.remove('screen');
+      glitch = 10; play('idle3', { flip: false });
+      place(spots()[0], true); home = true;
+      setTimeout(() => speak(L(D.ghostLines[0]), 2000), 500);
+    }
+    const poke = () => { lastInput = Date.now(); if (mode === 'screen') exitScreen(); };
+    ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(ev => addEventListener(ev, poke, { passive: true }));
+
+    /* 待机小动作与随机移动 */
     function idle() {
-      if (reduce) return;
-      if (!music.isOpen() && !hover) {
-        const spots = SPOTS(), pick = spots[Math.floor(Math.random() * spots.length)];
-        if (Math.random() < .5) { blinkTo(pick); home = pick === spots[0]; }
-        else glitch = 10;
-        if (Math.random() < .6) setTimeout(() => speak(L(D.ghostLines[Math.floor(Math.random() * D.ghostLines.length)])), 900);
+      if (!reduce && mode === 'idle' && !hover) {
+        if (Date.now() - lastInput > 20000) enterScreen();
+        else if (!music.isOpen() && anim !== 'move') {
+          const r = Math.random();
+          if (r < .35) { const list = spots(), p = list[Math.floor(Math.random() * list.length)]; walkTo(p); home = p === list[0]; }
+          else if (r < .8) play(EXTRAS[Math.floor(Math.random() * EXTRAS.length)]);
+          else glitch = 12;
+          if (Math.random() < .5) setTimeout(() => speak(L(D.ghostLines[Math.floor(Math.random() * D.ghostLines.length)])), 700);
+        }
       }
-      setTimeout(idle, 8000 + Math.random() * 7000);
+      setTimeout(idle, 6000 + Math.random() * 6000);
     }
-    $('#ghostBtn').addEventListener('click', () => {
+
+    btn.addEventListener('click', () => {
+      poke();
+      play('drag', { flip: false });             /* 被抓起来的表情 */
       if (music.isOpen()) { music.close(); return; }
       music.open(); if (!music.isPlaying()) music.toggle();
     });
-    $('#ghostBtn').addEventListener('pointerenter', () => { hover = true; glitch = 6; speak(t('ghost.hint'), 1600); });
-    $('#ghostBtn').addEventListener('pointerleave', () => { hover = false; });
-    setInterval(() => { if (music.isPlaying() && !reduce) spawnNote(); }, 700);
-    moveTo(SPOTS()[0]);
+    btn.addEventListener('pointerenter', () => { hover = true; if (mode === 'idle' && anim !== 'move') play('idle3', { flip: false }); speak(t('ghost.hint'), 1600); });
+    btn.addEventListener('pointerleave', () => { hover = false; });
+    setInterval(() => {
+      if (music.isPlaying() && !reduce) { spawnNote(); if (anim === 'idle2') play('idle4', { loop: true }); }
+      else if (anim === 'idle4' && loop) play('idle2', { loop: true });
+    }, 700);
+    addEventListener('resize', () => { if (mode === 'idle' && pos) place(spots()[pos.s === 'r' ? 0 : (innerWidth < 700 ? 1 : 2)], false); });
+
+    place(spots()[0], false);
+    play('idle2', { loop: true });
     requestAnimationFrame(draw);
     setTimeout(() => speak(L(D.ghostLines[0]), 2600), 2600);
-    setTimeout(idle, 9000);
-    return { home() { if (!home) { blinkTo(SPOTS()[0]); home = true; } } };
+    setTimeout(idle, 8000);
+    return { home() { if (mode === 'screen') exitScreen(); else if (!home) { walkTo(spots()[0]); home = true; } } };
   })();
 
   /* ---------- 声音档案（中文语音 + 三语台词） ---------- */
