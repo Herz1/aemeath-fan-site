@@ -2,6 +2,24 @@
 
 非官方《鸣潮》爱弥斯粉丝站（中文 / 日本語 / English）。界面语言与语音语言（◉）可分别切换。
 
+## 在线访问
+
+**[进入爱弥斯应援站](https://herz1.github.io/aemeath-fan-site/)**
+
+## GitHub Pages 发布
+
+本站通过 GitHub Pages 托管，发布源为 [`gh-pages` 分支](https://github.com/Herz1/aemeath-fan-site/tree/gh-pages)的根目录（`/`）。可在[仓库 Pages 设置](https://github.com/Herz1/aemeath-fan-site/settings/pages)查看发布配置。
+
+项目是纯静态站点，无需安装依赖或执行构建。保留根目录的 `.nojekyll` 文件，将 `index.html` 与完整的 `assets/` 目录一起发布。
+
+日常修改在 `main` 分支提交并推送后，可执行以下命令同步到发布分支：
+
+```bash
+git push origin main:gh-pages
+```
+
+只有推送到 `gh-pages` 的更新才会触发站点发布；仅更新 `main` 不会同步上线。部署状态可在 [Actions](https://github.com/Herz1/aemeath-fan-site/actions) 查看。
+
 ## 运行 / 起動 / Run
 
 需要通过 http 打开（不能直接双击 `index.html`），否则 YouTube 与音频无法播放：
